@@ -11,12 +11,13 @@ function Shape(body, color){
 
 
 var PILL_NUM = 12;
-var CLOT_NUM = 150;
+var CLOT_NUM = 250;
 
 var Engine = Matter.Engine;
 var Render = Matter.Render;
 var World = Matter.World;
 var Bodies = Matter.Bodies;
+var Body = Matter.Body;
 var Composite = Matter.Composite;
 var Events = Matter.Events
 var MouseConstraint = Matter.MouseConstraint
@@ -39,10 +40,14 @@ var boxA;
 var boxB;
 var ground;
 
+var attractiveBody;
+var angle = 0;
+var radius = 1;
+
 function setup() {
   blue = color(0, 255, 255, 200);
   red = color(105, 10, 10, 150);
-  createCanvas(500, 600);
+  createCanvas(windowWidth, windowHeight);
   background(237, 68, 91);
 
   // create an engine
@@ -58,7 +63,7 @@ function setup() {
   setInterval(function(){if (pills.length > 0) deletePill()}, 1000);
   setInterval(function(){if (clots.length > 0) deleteClot(clots.length - 1)}, 500);
     // create a body with an attractor
-  var attractiveBody = Bodies.circle(
+  attractiveBody = Bodies.circle(
     window.width/2,
     window.height/2,
     2, 
@@ -80,12 +85,14 @@ function setup() {
   });
 
 
+
+
   mouseObject = Bodies.circle(0, 0, 30);
 
   mouseObject.friction = 0.1;
   mouseObject.restitution = 3;
   mouseObject.frictionAir = 0.001;
-  shapes.push(mouseObject)
+  shapes.push(attractiveBody)
   World.add(engine.world, mouseObject);
 
   World.add(engine.world, attractiveBody);
@@ -103,7 +110,7 @@ function setup() {
   shapes.push(attractiveBody);
   var pillX = (Math.random() * 500);
   var pillY = Math.random() * 500;
-  setTimeout(function(){createPills(PILL_NUM, pillX, pillY)}, 3000);
+  setTimeout(function(){createPills(PILL_NUM, pillX, pillY)}, 8000);
   var clotX = (Math.random() * 500);
   var clotY = Math.random() * 500;
   createClots(CLOT_NUM, clotX, clotY);
@@ -158,7 +165,7 @@ function createClots(clotNum, xPos, yPos){
 
 
     var clotRadius = Math.random() * 7 + 2;
-    var sides = int(Math.random() * 6)
+    var sides = int(Math.random() * 4)
     var clot = Bodies.polygon(xPos, yPos, sides, clotRadius);
     clot.friction = 1;
     clot.restitution = 1.2;
@@ -171,6 +178,14 @@ function createClots(clotNum, xPos, yPos){
     clot = Matter.Body.scale(clot, 0.8, 1);
   }
   
+}
+function moveInCircle(body){
+  Body.translate(attractiveBody, {
+           x: body.position.x + cos(angle)*radius,
+           y: body.position.y + sin(angle)*radius
+      });
+  angle+= 0.1;
+ 
 }
 
 function drawShape(shape, fillColor){
@@ -229,6 +244,7 @@ function draw() {
   // var bodies = Composite.allBodies(engine.world);
 
   //background(237, 68, 91);
+  //moveInCircle(attractiveBody);
 
   if (mouseIsPressed && !mouseLock){
     mouseLock = true;
